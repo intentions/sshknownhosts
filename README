@@ -1,0 +1,6 @@
+ssh_key_harvester
+Written by: Kurt J. Strosahl
+Created 22may14
+
+This program gathers host keys from nodes found in the hosts file and uses it
+to build a ssh_known_hosts file
