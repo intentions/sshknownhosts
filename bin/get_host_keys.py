@@ -7,30 +7,32 @@ then placing that key in the data directory.
 import os, sys, subprocess, platform
 
 #sets lib and log paths
-log_dir = "../log/"
-lib_dir = "../lib/"
-dat_dir = "../data/"
+main_dir = "/home/strosahl/Testbed/python/host_key_harvester/"
+log_dir = main_dir + "log/"
+lib_dir = main_dir + "lib/"
+dat_dir = main_dir + "data/"
 logFile = log_dir + "gethostkey.log"
 
 #puts library dir into the python path
 sys.path.append(lib_dir)
 
 #import custom moduels
-import logWrite from logger
+from logger import logWrite
 
 
 def getHostKey(host, ipOption="-4", typeOption="rsa"):
 	"""
 	runs ssh-keyscan on a given host
+	options are hostname, ip (either -4 or -6, defults to -4, and key type (defaults to rsa)
 	"""
 	
 	#command
-	ssh-keyscan = "/usr/bin/ssh-keyscan"
+	sshkeyscan = '/usr/bin/ssh-keyscan'
 
-	p = subprocess.Popen([ssh-keyscan, ipOption, '-t', typeOption, host],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+	p = subprocess.Popen([sshkeyscan, ipOption, '-t', typeOption, host],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 	out, err = p.communicate()
 
-	if err:
+	if err and ( '#' not in err):
 		logMessage =  "could not gather host key for " + host + " error follows \n    " + str(err)
 		logWrite(logFile, logMessage, "ERROR")
 		return ("error", err)
@@ -56,17 +58,22 @@ def writeHostKeyFile(host, key, path):
 
 	try:
 		f = file(fileName, "w")
-	except: IOError:
+	except IOError:
 		logMessage = "could not open " + fileName + " for writting due to error:  \n    " + str(IOError)
 		return false
 
 	try:
 		f.write(key)
 	except IOError:
-		logMessage = "could not write to " + fileName + " due to error:   \n   " +
+		logMessage = "could not write to " + fileName + " due to error:   \n   " + str(IOError)
+		logWrite(logFile, logMessage, "ERROR")
+		return False
+
+	f.close()
+	return True
 
 
-if __name__ = "__main__":
+if __name__ == "__main__":
 	"""
 	if run as a standalone it gets the host key for the server it is run on
 	"""
