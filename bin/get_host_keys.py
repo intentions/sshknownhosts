@@ -16,17 +16,11 @@ lib_dir = root_dir + "lib/"
 dat_dir = root_dir + "data/"
 logFile = log_dir + "gethostkey.log"
 
-print str(cur_dir)
-print str(bin_trm)
-print str(root_dir)
-print str(log_dir)
-
 #puts library dir into the python path
 sys.path.append(lib_dir)
 
 #import custom moduels
 from logger import logWrite
-
 
 def getHostKey(host, ipOption="-4", typeOption="rsa"):
 	"""
