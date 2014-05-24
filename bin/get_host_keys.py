@@ -7,11 +7,19 @@ then placing that key in the data directory.
 import os, sys, subprocess, platform
 
 #sets lib and log paths
-main_dir = "/home/strosahl/Testbed/python/host_key_harvester/"
-log_dir = main_dir + "log/"
-lib_dir = main_dir + "lib/"
-dat_dir = main_dir + "data/"
+#ain_dir = "/home/strosahl/Testbed/python/host_key_harvester/"
+cur_dir = os.path.realpath(__file__)
+bin_trm = "bin/" + str(__file__)
+root_dir = cur_dir.replace(bin_trm, "")
+log_dir = root_dir + "log/"
+lib_dir = root_dir + "lib/"
+dat_dir = root_dir + "data/"
 logFile = log_dir + "gethostkey.log"
+
+print str(cur_dir)
+print str(bin_trm)
+print str(root_dir)
+print str(log_dir)
 
 #puts library dir into the python path
 sys.path.append(lib_dir)
