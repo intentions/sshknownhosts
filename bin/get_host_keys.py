@@ -8,9 +8,10 @@ import os, sys, subprocess, platform
 
 #sets lib and log paths
 #ain_dir = "/home/strosahl/Testbed/python/host_key_harvester/"
-cur_dir = os.path.realpath(__file__)
-bin_trm = "bin/" + str(__file__)
-root_dir = cur_dir.replace(bin_trm, "")
+myName = os.path.basename(__file__)
+myPath = os.path.realpath(__file__)
+bin_trm = "bin/" + str(myName)
+root_dir = str(myPath).replace(bin_trm, "")
 log_dir = root_dir + "log/"
 lib_dir = root_dir + "lib/"
 dat_dir = root_dir + "data/"
