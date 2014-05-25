@@ -3,6 +3,7 @@
 This script reads down the hosts files for hostnames matching a given pattern,
 it then generates a file containing the host keys for those servers
 """
+
 import sys,os,subprocess
 
 #sets up pathing for lib and log
@@ -21,14 +22,16 @@ sys.path.append(lib_dir)
 #import logWrite custom module
 from logger import logWrite
 
-def checkNew(cannonicalPatterns,knownHosts="ssh_known_hosts"):
+#define host matchs
+cannonicalPattern = "qcd farm"
+
+def checkNew(cannonicalPatterns, knownHosts):
 	"""
 	checks to see if any of the files in data with a name with
 	a match in cannonicalPatterns (a string), are younger than
 	ssh_known_hosts.  If it is then it returns True and a list 
 	in dat_dir, else False and an empty list
 	"""
-
 	workList = []
 	fileList = next(os.walk(dat_dir))[2]
 
@@ -38,9 +41,14 @@ def checkNew(cannonicalPatterns,knownHosts="ssh_known_hosts"):
 
 	if len(workList):
 		logMessage = "no files in " + dat_dir + " found matching " + cannonicalPatterns 
-		logWriter(logFile,logMessage,"ERROR")
+		logWrite(logFile,logMessage,"ERROR")
 		return False 
 
+	if not os.path.isfile(sshKnownHosts):
+		logMessage = "no ssh_known_hosts file found in " + dat_dir + " new file will be generated."
+		logWrite(logFile, logMessage, "INFO")
+		return (True, workList)
+	
 	for w in workList:
 		if os.path.getmtime(dat_dir + knownHosts) < os.path.getmtime(dat_dir + w):
 			logMessage = "new keys found"
@@ -58,13 +66,18 @@ def buildKnownHosts(fileList,knownHostsFile=""):
 	keyList = []
 
 	for f in fileList:
-		k = open(f, 'r')
-		for l in k:
-			keyList.append(l)
+		try:
+			k = open(f, 'r')
+		except IOError:
+			logMessage = "could not open " + k + " to read key, skipping..."
+			logWrite(logFile, logMessage, "ERROR")
+			continue
+		keyList.append(k.read())
 		k.close
 
 	keys = '\n'.join(keyList)
 
+	#if no ssh_known_hosts file is given then return return keys as a string
 	if knownHostsFile == "":
 		return (True, keys)
 	
@@ -81,5 +94,9 @@ if  __name__ == "__main__":
 	"""
 	where the work is done
 	"""
+	
+	sshKnownHosts = dat_dir + "ssh_known_hosts"
+	
+	flag, keyList = checkNew(cannonicalPattern, sshKnownHosts)
 
-
+	buildKnownHosts(keyList, sshKnownHosts)
