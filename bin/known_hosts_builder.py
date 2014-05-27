@@ -35,8 +35,10 @@ def checkNew(cannonicalPatterns, knownHosts):
 	workList = []
 	fileList = next(os.walk(dat_dir))[2]
 
+
 	for f in fileList:
 		if f in cannonicalPatterns:
+			print str(f)
 			workList.append(f)
 
 	if len(workList):
@@ -95,8 +97,11 @@ if  __name__ == "__main__":
 	where the work is done
 	"""
 	
+	cannonicalPattern = "sky"
 	sshKnownHosts = dat_dir + "ssh_known_hosts"
 	
 	flag, keyList = checkNew(cannonicalPattern, sshKnownHosts)
+
+	print str(keyList)
 
 	buildKnownHosts(keyList, sshKnownHosts)
