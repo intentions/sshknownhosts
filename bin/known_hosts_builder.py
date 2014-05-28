@@ -23,7 +23,7 @@ sys.path.append(lib_dir)
 from logger import logWrite
 
 #define host matchs
-cannonicalPattern = "qcd farm"
+cannonicalPatterns = ["qcd", "farm"]
 
 def checkNew(cannonicalPatterns, knownHosts):
 	"""
@@ -97,7 +97,6 @@ if  __name__ == "__main__":
 	where the work is done
 	"""
 	
-	cannonicalPattern = "sky"
 	sshKnownHosts = dat_dir + "ssh_known_hosts"
 	
 	flag, keyList = checkNew(cannonicalPattern, sshKnownHosts)
