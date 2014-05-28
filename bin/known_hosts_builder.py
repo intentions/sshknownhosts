@@ -54,7 +54,7 @@ def checkNew(cannonicalPatterns, knownHosts):
 	for w in workList:
 		if os.path.getmtime(knownHosts) < os.path.getmtime(dat_dir + w):
 			logMessage = "new keys found"
-			logWritter(logFIle,logMessage,"INFO")
+			logWrite(logFile,logMessage,"INFO")
 			return (True, workList)
 
 	return (False, [])
@@ -102,4 +102,5 @@ if  __name__ == "__main__":
 	
 	flag, keyList = checkNew(cannonicalPatterns, sshKnownHosts)
 
-	buildKnownHosts(keyList, sshKnownHosts)
+	if flag:
+		buildKnownHosts(keyList, sshKnownHosts)
