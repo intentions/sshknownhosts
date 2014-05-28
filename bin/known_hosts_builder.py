@@ -37,12 +37,12 @@ def checkNew(cannonicalPatterns, knownHosts):
 
 
 	for f in fileList:
-		if f in cannonicalPatterns:
-			print str(f)
-			workList.append(f)
+		for p in cannonicalPatterns:
+			if p in f:
+				workList.append(f)
 
-	if len(workList):
-		logMessage = "no files in " + dat_dir + " found matching " + cannonicalPatterns 
+	if len(workList) == 0:
+		logMessage = "no files in " + dat_dir + " found matching " 
 		logWrite(logFile,logMessage,"ERROR")
 		return False 
 
@@ -52,7 +52,7 @@ def checkNew(cannonicalPatterns, knownHosts):
 		return (True, workList)
 	
 	for w in workList:
-		if os.path.getmtime(dat_dir + knownHosts) < os.path.getmtime(dat_dir + w):
+		if os.path.getmtime(knownHosts) < os.path.getmtime(dat_dir + w):
 			logMessage = "new keys found"
 			logWritter(logFIle,logMessage,"INFO")
 			return (True, workList)
@@ -68,10 +68,11 @@ def buildKnownHosts(fileList,knownHostsFile=""):
 	keyList = []
 
 	for f in fileList:
+		f = dat_dir + f
 		try:
 			k = open(f, 'r')
 		except IOError:
-			logMessage = "could not open " + k + " to read key, skipping..."
+			logMessage = "could not open " + str(f) + " to read key, skipping..."
 			logWrite(logFile, logMessage, "ERROR")
 			continue
 		keyList.append(k.read())
@@ -99,8 +100,6 @@ if  __name__ == "__main__":
 	
 	sshKnownHosts = dat_dir + "ssh_known_hosts"
 	
-	flag, keyList = checkNew(cannonicalPattern, sshKnownHosts)
-
-	print str(keyList)
+	flag, keyList = checkNew(cannonicalPatterns, sshKnownHosts)
 
 	buildKnownHosts(keyList, sshKnownHosts)
