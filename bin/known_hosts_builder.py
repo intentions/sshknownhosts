@@ -44,7 +44,7 @@ def checkNew(cannonicalPatterns, knownHosts):
 	if len(workList) == 0:
 		logMessage = "no files in " + dat_dir + " found matching " 
 		logWrite(logFile,logMessage,"ERROR")
-		return False 
+		return (False, [])
 
 	if not os.path.isfile(sshKnownHosts):
 		logMessage = "no ssh_known_hosts file found in " + dat_dir + " new file will be generated."
