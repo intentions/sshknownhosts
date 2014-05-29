@@ -2,5 +2,6 @@ ssh_key_harvester
 Written by: Kurt J. Strosahl
 Created 22may14
 
-This process gathers host keys on server build, placing each host key in a file identified by hostname.
-Then a process comes along and builds a ssh_known_host file from those files.
+This is a two step process... first when a host is built its new key is placed in data/<hostname>
+Then another process checks the data directory for new keys.  It then updates the ssh_known_hosts 
+if a new key is detected.
