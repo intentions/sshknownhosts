@@ -40,6 +40,11 @@ def getHostKey(host, ipOption="-4", typeOption="rsa"):
 		logWrite(logFile, logMessage, "ERROR")
 		return ("error", err)
 
+	if not out:
+		logMessage = "empty host key returned, this may mean that no host key was generated or that the hostname " + host + "does not resolve to its IP.\n"
+		logWrite(logFile, logMessage, "ERROR")
+		return ("error", logMessage)	
+
 	return (out, "")
 
 def writeHostKeyFile(host, key, path):
@@ -63,7 +68,7 @@ def writeHostKeyFile(host, key, path):
 		f = file(fileName, "w")
 	except IOError:
 		logMessage = "could not open " + fileName + " for writting due to error:  \n    " + str(IOError)
-		return false
+		return False
 
 	try:
 		f.write(key)
