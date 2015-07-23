@@ -132,6 +132,3 @@ if __name__ == "__main__":
 
 	if not err:
 		writeHostKeyFile(hostName, key, dat_dir)
-
-	else:
-		sys.stderr.write(str(err))
