@@ -4,7 +4,7 @@ This program runs on build, getting the host key for the server on which it is r
 then placing that key in the data directory.
 """
 
-import os, sys, subprocess, platform
+import os, sys, subprocess, platform, logging
 
 #sets lib and log paths
 #ain_dir = "/home/strosahl/Testbed/python/host_key_harvester/"
@@ -20,8 +20,44 @@ logFile = log_dir + "gethostkey.log"
 #puts library dir into the python path
 sys.path.append(lib_dir)
 
-#import custom moduels
-from logger import logWrite
+#import setup logging
+def logConfigure(logFileName, debugFlag=False):
+	"""
+	experimental function to configure logging
+	"""
+	logPath = '../log/'
+
+	logFile = '{0}{1}'.format(logPath, logFileName)
+
+	logger = logging.getLogger(__name__)
+	logger.setLevel(logging.DEBUG)
+
+	# create file handler which logs even debug messages
+	fh = logging.FileHandler(logFile)
+	fh.setLevel(logging.DEBUG)
+
+	# create console handler with a higher log level
+	ch = logging.StreamHandler()
+	ch.setLevel(logging.INFO)
+	#set logging level
+	if debugFlag:
+		fh.setLevel(logging.DEBUG)
+		ch.setLevel(logging.DEBUG)
+	else:
+		fh.setLevel(logging.INFO)
+		ch.setLevel(logging.INFO)
+	# create formatter and add it to the handlers
+	formatOptions = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+	formatter = logging.Formatter(formatOptions)
+	ch.setFormatter(formatter)
+	fh.setFormatter(formatter)
+
+	# add the handlers to logger
+	logger.addHandler(ch)
+	logger.addHandler(fh)
+
+	return logger
+
 
 def getHostKey(host, ipOption="-4", typeOption="rsa"):
 	"""
