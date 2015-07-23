@@ -12,20 +12,17 @@ myName = os.path.basename(__file__)
 myPath = os.path.realpath(__file__)
 bin_trm = "bin/" + str(myName)
 root_dir = str(myPath).replace(bin_trm, "")
-log_dir = root_dir + "log/"
 lib_dir = root_dir + "lib/"
 dat_dir = root_dir + "data/"
-logFile = log_dir + "gethostkey.log"
 
 #puts library dir into the python path
 sys.path.append(lib_dir)
 
 #import setup logging
-def logConfigure(logFileName, debugFlag=False):
+def logConfigure(logFileName, debugFlag=False, logPath='../log/'):
 	"""
 	experimental function to configure logging
 	"""
-	logPath = '../log/'
 
 	logFile = '{0}{1}'.format(logPath, logFileName)
 
@@ -38,7 +35,7 @@ def logConfigure(logFileName, debugFlag=False):
 
 	# create console handler with a higher log level
 	ch = logging.StreamHandler()
-	ch.setLevel(logging.INFO)
+	
 	#set logging level
 	if debugFlag:
 		fh.setLevel(logging.DEBUG)
@@ -46,6 +43,7 @@ def logConfigure(logFileName, debugFlag=False):
 	else:
 		fh.setLevel(logging.INFO)
 		ch.setLevel(logging.INFO)
+
 	# create formatter and add it to the handlers
 	formatOptions = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 	formatter = logging.Formatter(formatOptions)
@@ -73,12 +71,12 @@ def getHostKey(host, ipOption="-4", typeOption="rsa"):
 
 	if err and ( '#' not in err):
 		logMessage =  "could not gather host key for " + host + " error follows \n    " + str(err)
-		logWrite(logFile, logMessage, "ERROR")
+		logger.error(logMessage)
 		return ("error", err)
 
 	if not out:
 		logMessage = "empty host key returned, this may mean that no host key was generated or that the hostname " + host + "does not resolve to its IP.\n"
-		logWrite(logFile, logMessage, "ERROR")
+		logger.error(logMessage)
 		return ("error", logMessage)	
 
 	return (out, "")
@@ -94,23 +92,24 @@ def writeHostKeyFile(host, key, path):
 		try:
 			os.remove(fileName)
 			logMessage = "prior host key file for: " + host + " found, file removed."
-			logWrite(logFile, logMessage, "INFO")
+			logger.info(logMessage)
 		except OSError:
 			logMessage = "warning - could not remove pre-existing host key for " + host + " - process aborted"
-			logWrite(logFile, logMessage, "ERROR")
+			logger.info(logMessage)
 			return False
 
 	try:
 		f = file(fileName, "w")
 	except IOError:
 		logMessage = "could not open " + fileName + " for writting due to error:  \n    " + str(IOError)
+		logger.error(logMessage)
 		return False
 
 	try:
 		f.write(key)
 	except IOError:
 		logMessage = "could not write to " + fileName + " due to error:   \n   " + str(IOError)
-		logWrite(logFile, logMessage, "ERROR")
+		logger.error(logMessage)
 		return False
 
 	f.close()
@@ -122,6 +121,10 @@ if __name__ == "__main__":
 	if run as a standalone it gets the host key for the server it is run on
 	"""
 
+	logFileName = "get_host_keys.log"
+	
+	logger = logConfigure(logFileName)
+	
 	#gets hostname
 	hostName = platform.node()
 
