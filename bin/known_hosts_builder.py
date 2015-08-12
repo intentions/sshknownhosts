@@ -104,3 +104,7 @@ if  __name__ == "__main__":
 
 	if flag:
 		buildKnownHosts(keyList, sshKnownHosts)
+		logMessage = "ssh_known_hosts file updated"			
+		logWrite(logFile, logMessage, "INFO")
+		sys.exit()
+	
