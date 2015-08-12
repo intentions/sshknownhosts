@@ -94,24 +94,27 @@ def writeHostKeyFile(host, key, path):
 			os.remove(fileName)
 			logMessage = "prior host key file for: " + host + " found, file removed."
 			logger.info(logMessage)
-		except OSError:
-			logMessage = "warning - could not remove pre-existing host key for " + host + " - process aborted"
-			logger.info(logMessage)
+		except OSError as err:
+			logMessage = "could not remove pre-existing host key file for {0} due to error({1}: {2}".format(fileName, err.errno, err.strerror)
+			logger.error(logMessage)
 			return False
 
 	try:
 		f = file(fileName, "w")
-	except IOError:
-		logMessage = "could not open " + fileName + " for writting due to error:  \n    " + str(IOError)
+	except IOError as err:
+		logMessage = "could not open {0} for writting due to error({1}): {2}".format(fileName, err.errno, err.strerror)
 		logger.error(logMessage)
 		return False
 
 	try:
 		f.write(key)
-	except IOError:
-		logMessage = "could not write to " + fileName + " due to error:   \n   " + str(IOError)
+	except IOError as err:
+		logMessage = "could not write to {0} due to error({1}: {2}".format(fileName, err.errno, e.strerror)
 		logger.error(logMessage)
 		return False
+
+	logMessage = "host key file {0} written".format(fileName)
+	logger.info(logMessage)
 
 	f.close()
 	return True
