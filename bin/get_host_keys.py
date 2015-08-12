@@ -7,14 +7,6 @@ then placing that key in the data directory.
 
 import os, sys, subprocess, platform, logging
 
-#sets lib and log paths
-#ain_dir = "/home/strosahl/Testbed/python/host_key_harvester/"
-myName = os.path.basename(__file__)
-myPath = os.path.realpath(__file__)
-bin_trm = "bin/" + str(myName)
-root_dir = str(myPath).replace(bin_trm, "")
-dat_dir = root_dir + "data/"
-
 #import setup logging
 def logConfigure(logFileName, debugFlag=False, logPath='../log/'):
 	"""

@@ -1,5 +1,7 @@
 {
-	"host key storage":{
-		"path": "/tmp"
+	"configuration":{
+		"path_to_key_file": "../data"
+		"key_command": "/usr/bin/ssh-keyscan"
+		"log_file": "../log/get_host_keys.log"
 	}
 }
