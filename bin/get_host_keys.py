@@ -58,7 +58,7 @@ def logConfigure(logFileName, debugFlag=False, logPath='../log/'):
 	return logger
 
 
-def getHostKey(host, ipOption="-4", typeOption="rsa"):
+def getHostKey(hostName, ipOption="-4", typeOption="rsa"):
 	"""
 	runs ssh-keyscan on a given host
 	options are hostname, ip (either -4 or -6, defults to -4, and key type (defaults to rsa)
@@ -67,16 +67,16 @@ def getHostKey(host, ipOption="-4", typeOption="rsa"):
 	#command
 	sshkeyscan = '/usr/bin/ssh-keyscan'
 
-	p = subprocess.Popen([sshkeyscan, ipOption, '-t', typeOption, host],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+	p = subprocess.Popen([sshkeyscan, ipOption, '-t', typeOption, hostName],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 	out, err = p.communicate()
 
 	if err and ( '#' not in err):
-		logMessage =  "could not gather host key for " + host + " error follows \n    " + str(err)
+		logMessage =  "could not gather host key for {0} due to error:\n {1}".format(hostName, str(err))
 		logger.error(logMessage)
 		return ("error", err)
 
 	if not out:
-		logMessage = "empty host key returned, this may mean that no host key was generated or that the hostname " + host + "does not resolve to its IP.\n"
+		logMessage = "empty host key returned for {0}".format(hostName) 
 		logger.error(logMessage)
 		return ("error", logMessage)	
 
@@ -126,7 +126,6 @@ if __name__ == "__main__":
 	"""
 
 	logFileName = "get_host_keys.log"
-	
 	logger = logConfigure(logFileName)
 	
 	#gets hostname
@@ -134,5 +133,11 @@ if __name__ == "__main__":
 
 	key, err = getHostKey(hostName)
 
-	if not err:
-		writeHostKeyFile(hostName, key, dat_dir)
+	if err:
+		logMessage = "encountered error getting key for {0}, exiting.".format(hostName)
+		logger.error(logMessage)
+		sys.exit()
+	
+	writeHostKeyFile(hostName, key, dat_dir)
+	logMessage = "host key for {0} written to {1}".format(hostName, dat_dir)
+	logger.info(logMessage)	
