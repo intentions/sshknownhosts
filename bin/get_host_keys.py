@@ -15,9 +15,6 @@ bin_trm = "bin/" + str(myName)
 root_dir = str(myPath).replace(bin_trm, "")
 dat_dir = root_dir + "data/"
 
-#puts library dir into the python path
-sys.path.append(lib_dir)
-
 #import setup logging
 def logConfigure(logFileName, debugFlag=False, logPath='../log/'):
 	"""
@@ -68,24 +65,21 @@ def getHostKey(hostName, ipOption="-4", typeOption="rsa"):
 
 	#check to ensure that command is present, raise exception if not (experimental)
 	if not os.path.isfile(sshkeyscan):
-		logMessage = "{0} not present, aborting".format(sshkeyscan)
-		logger.error(logMessage)
-		raise Exception(logMessage)
+		errorMessage = "{0} not present, aborting".format(sshkeyscan)
+		raise Exception(errorMessage)
 	
 	p = subprocess.Popen([sshkeyscan, ipOption, '-t', typeOption, hostName],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 	out, err = p.communicate()
 
 	if err and ( '#' not in err):
-		logMessage =  "could not gather host key for {0} due to error:\n {1}".format(hostName, str(err))
-		logger.error(logMessage)
-		raise Exception("error", err)
+		errorMessage =  "could not gather host key for {0} due to error:\n {1}".format(hostName, str(err))
+		raise Exception(errorMessage)
 
 	if not out:
-		logMessage = "empty host key returned for {0}".format(hostName) 
-		logger.error(logMessage)
-		return ("error", logMessage)	
+		errorMessage = "empty host key returned for {0}".format(hostName) 
+		raise Exception(errorMessage)	
 
-	return (out, "")
+	return out
 
 def writeHostKeyFile(host, key, path):
 	"""
@@ -136,10 +130,10 @@ if __name__ == "__main__":
 	#gets hostname
 	hostName = platform.node()
 
-	key, err = getHostKey(hostName)
-
-	if err:
-		logMessage = "encountered error getting key for {0}, exiting.".format(hostName)
+	try:
+		key = getHostKey(hostName)
+	except Exception as Exc:
+		logMessage = "excption raised from getHostKey: {0}".format(Exc)
 		logger.error(logMessage)
 		sys.exit()
 	
