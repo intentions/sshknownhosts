@@ -13,7 +13,6 @@ myName = os.path.basename(__file__)
 myPath = os.path.realpath(__file__)
 bin_trm = "bin/" + str(myName)
 root_dir = str(myPath).replace(bin_trm, "")
-lib_dir = root_dir + "lib/"
 dat_dir = root_dir + "data/"
 
 #puts library dir into the python path
@@ -67,13 +66,19 @@ def getHostKey(hostName, ipOption="-4", typeOption="rsa"):
 	#command
 	sshkeyscan = '/usr/bin/ssh-keyscan'
 
+	#check to ensure that command is present, raise exception if not (experimental)
+	if not os.path.isfile(sshkeyscan):
+		logMessage = "{0} not present, aborting".format(sshkeyscan)
+		logger.error(logMessage)
+		raise Exception(logMessage)
+	
 	p = subprocess.Popen([sshkeyscan, ipOption, '-t', typeOption, hostName],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 	out, err = p.communicate()
 
 	if err and ( '#' not in err):
 		logMessage =  "could not gather host key for {0} due to error:\n {1}".format(hostName, str(err))
 		logger.error(logMessage)
-		return ("error", err)
+		raise Exception("error", err)
 
 	if not out:
 		logMessage = "empty host key returned for {0}".format(hostName) 
