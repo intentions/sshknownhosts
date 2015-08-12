@@ -132,10 +132,19 @@ if __name__ == "__main__":
 	except Exception as Exc:
 		logMessage = "excption raised from getHostKey: {0}".format(Exc)
 		logger.error(logMessage)
-		sys.exit()
+		sys.exit(1)
+		
 	try:
 		writeHostKeyFile(hostName, key, dat_dir)
 	except IOError as e:
-		logMessage =
+		logMessage = "I/O Error({0}) writting host key file: {1}".format(e.errno, e.strerror)
+		logger.error(logMessage)
+		sys.exit(1)
+	except:
+		logMessage = "unexpected error encoutered writting host key file: {0}".format(sys.exc_info()[0])
+		logger.error(logMessage)
+		sys.exit(1)
+	
 	logMessage = "host key for {0} written to {1}".format(hostName, dat_dir)
-	logger.info(logMessage)	
+	logger.info(logMessage)
+	sys.exit(0)
