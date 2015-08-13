@@ -4,7 +4,7 @@ This script reads down the hosts files for hostnames matching a given pattern,
 it then generates a file containing the host keys for those servers
 """
 
-import sys,os,subprocess
+import sys, os, logging, json
 
 #sets up pathing for lib and log
 myName = os.path.basename(__file__)
@@ -19,8 +19,42 @@ logFile = log_dir + "buildsshknownhosts.log"
 #sets the library path
 sys.path.append(lib_dir)
 
-#import logWrite custom module
-from logger import logWrite
+def logConfigure(logFileName, debugFlag=False, logPath='../log/'):
+    """
+	experimental function to configure logging
+	"""
+
+    logFile = '{0}{1}'.format(logPath, logFileName)
+
+    logger = logging.getLogger(os.path.basename(__file__))
+    logger.setLevel(logging.DEBUG)
+
+    # create file handler which logs even debug messages
+    fh = logging.FileHandler(logFile)
+    fh.setLevel(logging.DEBUG)
+
+    # create console handler with a higher log level
+    ch = logging.StreamHandler()
+
+    # set logging level
+    if debugFlag:
+        fh.setLevel(logging.DEBUG)
+        ch.setLevel(logging.DEBUG)
+    else:
+        fh.setLevel(logging.INFO)
+        ch.setLevel(logging.INFO)
+
+    # create formatter and add it to the handlers
+    formatOptions = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    formatter = logging.Formatter(formatOptions)
+    ch.setFormatter(formatter)
+    fh.setFormatter(formatter)
+
+    # add the handlers to logger
+    logger.addHandler(ch)
+    logger.addHandler(fh)
+
+    return logger
 
 #define host matchs
 cannonicalPatterns = ["qcd", "farm"]

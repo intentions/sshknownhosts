@@ -118,7 +118,7 @@ def writeHostKeyFile(host, key, path):
     if os.path.isfile(fileName):
         try:
             os.remove(fileName)
-            logMessage = "prior host key file for: " + host + " found, file removed."
+            logMessage = "prior host key file for: {0} found, file removed.".format(host)
             logger.info(logMessage)
         except:
             raise
