@@ -33,10 +33,13 @@ def parseConf(confData):
 	}
 
     for confkey in confData.keys():
-        configuration["debugFlag"] = str(confData[confkey]["debug_flag"])
-        configuration["key_command"] = str(confData[confkey]["key_command"])
-        configuration["data_path"] = str(confData[confkey]["path_to_key_file"])
-        configuration["log_file"] = str(confData[confkey]["log_file"])
+        try:
+            configuration["debugFlag"] = str(confData[confkey]["debug_flag"])
+            configuration["key_command"] = str(confData[confkey]["key_command"])
+            configuration["data_path"] = str(confData[confkey]["path_to_key_file"])
+            configuration["log_file"] = str(confData[confkey]["log_file"])
+        except:
+            raise
 
     return configuration
 
@@ -48,7 +51,7 @@ def logConfigure(logFileName, debugFlag=False, logPath='../log/'):
 
     logFile = '{0}{1}'.format(logPath, logFileName)
 
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger(os.path.basename(__file__))
     logger.setLevel(logging.DEBUG)
 
     # create file handler which logs even debug messages
