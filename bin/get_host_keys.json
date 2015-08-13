@@ -1,8 +1,8 @@
 {
 	"configuration":{
-		"debug_flag": "False"
-		"key_command": "/usr/bin/ssh-keyscan"
-		"path_to_key_file": "../data"
+		"debug_flag": "False",
+		"key_command": "/usr/bin/ssh-keyscan",
+		"path_to_key_file": "../data",
 		"log_file": "../log/get_host_keys.log"
 	}
 }
