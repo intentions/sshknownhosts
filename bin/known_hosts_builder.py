@@ -19,14 +19,14 @@ logFile = log_dir + "buildsshknownhosts.log"
 #sets the library path
 sys.path.append(lib_dir)
 
-def logConfigure(logFileName, debugFlag=False, logPath='../log/'):
+def logConfigure(logFileName=os.path.basename(__file__), debugFlag=False, logPath='../log/'):
     """
 	experimental function to configure logging
 	"""
 
     logFile = '{0}{1}'.format(logPath, logFileName)
 
-    logger = logging.getLogger(os.path.basename(__file__))
+    logger = logging.getLogger(logFileName)
     logger.setLevel(logging.DEBUG)
 
     # create file handler which logs even debug messages
@@ -77,18 +77,18 @@ def checkNew(cannonicalPatterns, knownHosts):
 
 	if len(workList) == 0:
 		logMessage = "no files in " + dat_dir + " found matching " 
-		logWrite(logFile,logMessage,"ERROR")
+		logger.error(logMessage)
 		return (False, [])
 
 	if not os.path.isfile(sshKnownHosts):
 		logMessage = "no ssh_known_hosts file found in " + dat_dir + " new file will be generated."
-		logWrite(logFile, logMessage, "INFO")
+		logger.info(logMessage)
 		return (True, workList)
 	
 	for w in workList:
 		if os.path.getmtime(knownHosts) < os.path.getmtime(dat_dir + w):
 			logMessage = "new keys found"
-			logWrite(logFile,logMessage,"INFO")
+			logger.info(logMessage)
 			return (True, workList)
 
 	return (False, [])
@@ -107,7 +107,7 @@ def buildKnownHosts(fileList,knownHostsFile=""):
 			k = open(f, 'r')
 		except IOError:
 			logMessage = "could not open " + str(f) + " to read key, skipping..."
-			logWrite(logFile, logMessage, "ERROR")
+			logger.error(logMessage)
 			continue
 		keyList.append(k.read())
 		k.close
@@ -125,20 +125,21 @@ def buildKnownHosts(fileList,knownHostsFile=""):
 	sshKnownHosts.close
 
 	return (True, knownHostsFile)
-	
+
 
 if  __name__ == "__main__":
-	"""
-	where the work is done
-	"""
-	
-	sshKnownHosts = dat_dir + "ssh_known_hosts"
-	
-	flag, keyList = checkNew(cannonicalPatterns, sshKnownHosts)
+    """
+    where the work is done
+    """
 
-	if flag:
-		buildKnownHosts(keyList, sshKnownHosts)
-		logMessage = "ssh_known_hosts file updated"			
-		logWrite(logFile, logMessage, "INFO")
-		sys.exit()
+    logger = logConfigure()
+
+    sshKnownHosts = dat_dir + "ssh_known_hosts"
 	
+    flag, keyList = checkNew(cannonicalPatterns, sshKnownHosts)
+
+    if flag:
+        buildKnownHosts(keyList, sshKnownHosts)
+        logMessage = "ssh_known_hosts file updated"
+        logger.info(logMessage)
+        sys.exit(0)
