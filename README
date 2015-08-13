@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-ssh_key_harvester
-Written by: Kurt J. Strosahl
-Created 22may14
-
-This is a two step process... first when a host is built its new key is placed in data/<hostname>
-Then another process checks the data directory for new keys.  It then updates the ssh_known_hosts 
-if a new key is detected.
-
-=======
 ssh_key_harvester
 Written by: Kurt J. Strosahl
 Created 22may14
@@ -18,4 +8,8 @@ if a new key is detected.
 
 for the get_host_key.py program to work the system needs to be able to resolve its host name.
 
->>>>>>> 60d5c12739e4693a66f8f2185c41ba2d379e5351
+each script has a separate json formatted configuration file that is read in containing path information.
+
+
+TODO:
+add command line options
