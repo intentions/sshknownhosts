@@ -7,7 +7,34 @@ then placing that key in the data directory.
 
 import os, sys, subprocess, platform, logging
 
-#import setup logging
+def readConf(configFile):
+	"""
+	reads a json formatted configuration file
+	"""
+	
+	try:
+		with open(configFile) as json_data_file:
+			return json.load(json_data_file)
+	except:
+		raise 
+		
+	
+def parseConf(confData):
+	"""
+	parses the configuration data
+	"""
+	
+	configuration = dict([("debugFlag", "False"), ("key_command",""),("data_path",""),("log_file","")])
+	
+	configs = confData.keys()
+	
+	configuration["debugFlag"] = configData[configs]["debug_flag"]
+	configuratoin["key_command"] = configData[configs]["key_command"]
+	configuration["data_path"] = configData[configs]["data_path"]
+	configuration["log_file"] = configData[configs]["log_file"]
+	
+	return configuration
+
 def logConfigure(logFileName, debugFlag=False, logPath='../log/'):
 	"""
 	experimental function to configure logging
@@ -89,22 +116,13 @@ def writeHostKeyFile(host, key, path):
 			raise 
 
 	try:
-		f = file(fileName, "w")
-	except:
-		raise
-
-	try:
-		f.write(key)
+		with open(fileName, 'w') as f:
+			f.write(key)
 	except:
 		raise
 
 	logMessage = "host key file {0} written".format(fileName)
 	logger.info(logMessage)
-
-	try:
-		f.close()
-	except:
-		raise
 		
 	return True
 
@@ -113,23 +131,28 @@ if __name__ == "__main__":
 	if run as a standalone it gets the host key for the server it is run on
 	"""
 
-	logFileName = "get_host_keys.log"
-	logger = logConfigure(logFileName)
+	configs = parseConf(readConf(confFile))
+	
+	logger = logConfigure(configs['log_file'])
 	
 	#gets hostname
 	hostName = platform.node()
 
 	try:
-		key = getHostKey(hostName)
+		key = getHostKey(hostName, cmd)
 	except Exception as Exc:
 		logMessage = "excption raised from getHostKey: {0}".format(Exc)
 		logger.error(logMessage)
 		sys.exit(1)
-		
+	
 	try:
-		writeHostKeyFile(hostName, key, dat_dir)
+		writeHostKeyFile(hostName, key, configs['data_path'])
 	except IOError as e:
 		logMessage = "I/O Error({0}) writting host key file: {1}".format(e.errno, e.strerror)
+		logger.error(logMessage)
+		sys.exit(1)
+	except NameError as e:
+		logMessage = "Name Error writting host key file: {0}".format(e)
 		logger.error(logMessage)
 		sys.exit(1)
 	except:
@@ -137,6 +160,6 @@ if __name__ == "__main__":
 		logger.error(logMessage)
 		sys.exit(1)
 	
-	logMessage = "host key for {0} written to {1}".format(hostName, dat_dir)
+	logMessage = "host key for {0} written to {1}".format(hostName, configs['data_path'])
 	logger.info(logMessage)
 	sys.exit(0)
