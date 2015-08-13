@@ -113,7 +113,7 @@ def writeHostKeyFile(host, key, path):
 	Writes the host key into a file named after the hostname
 	"""
 
-    fileName = "{0}{1}".format(path, host)
+    fileName = "{0}/{1}".format(path, host)
 
     if os.path.isfile(fileName):
         try:

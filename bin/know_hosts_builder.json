@@ -1,6 +1,11 @@
 {
 	"configuration":{
 		"debug_flag": "False",
+        "cannonical_patterns": [
+          "qcd",
+          "farm",
+          "winter"
+        ],
 		"path_to_key_file": "../data",
 		"log_file": "../log/known_hosts_builder.log"
 	}
