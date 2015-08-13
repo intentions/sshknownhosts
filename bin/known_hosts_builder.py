@@ -76,12 +76,12 @@ def checkNew(cannonicalPatterns, knownHosts):
 				workList.append(f)
 
 	if len(workList) == 0:
-		logMessage = "no files in " + dat_dir + " found matching " 
+		logMessage = "no files in {0} found matching ".format(dat_dir)
 		logger.error(logMessage)
 		return (False, [])
 
 	if not os.path.isfile(sshKnownHosts):
-		logMessage = "no ssh_known_hosts file found in " + dat_dir + " new file will be generated."
+		logMessage = "no ssh_known_hosts file found in {0} new file will be generated.".format(dat_dir)
 		logger.info(logMessage)
 		return (True, workList)
 	
@@ -106,7 +106,7 @@ def buildKnownHosts(fileList,knownHostsFile=""):
 		try:
 			k = open(f, 'r')
 		except IOError:
-			logMessage = "could not open " + str(f) + " to read key, skipping..."
+			logMessage = "could not open {0} to read key, skipping...".format(str(f))
 			logger.error(logMessage)
 			continue
 		keyList.append(k.read())
@@ -134,7 +134,7 @@ if  __name__ == "__main__":
 
     logger = logConfigure()
 
-    sshKnownHosts = dat_dir + "ssh_known_hosts"
+    sshKnownHosts = "{0}ssh_known_hosts".format(dat_dir)
 	
     flag, keyList = checkNew(cannonicalPatterns, sshKnownHosts)
 

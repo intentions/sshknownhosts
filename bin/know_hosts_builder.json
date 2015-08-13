@@ -1,0 +1,7 @@
+{
+	"configuration":{
+		"debug_flag": "False",
+		"path_to_key_file": "../data",
+		"log_file": "../log/known_hosts_builder.log"
+	}
+}
