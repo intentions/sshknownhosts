@@ -49,6 +49,17 @@ def parseConfData(configData):
 	message = "parsing configuration data"
 	logger.debug(message)
 
+	configuration = {
+		"debug_flag": False,
+		"cannonical_patterns": [],
+		"path_to_key_file": "",
+		"log_path": ""
+	}
+
+	for confKey in configData.key():
+		try:
+			configuration["debug_flag"] = str(configData[configKey]["debug_flag"])
+			configuration[]
 
 
 def logConfigure(logFileName=os.path.basename(__file__), debugFlag=False, logPath='../log/'):
