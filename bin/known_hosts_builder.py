@@ -59,7 +59,14 @@ def parseConfData(configData):
 	for confKey in configData.key():
 		try:
 			configuration["debug_flag"] = str(configData[configKey]["debug_flag"])
-			configuration[]
+			for p in configData[configKey]["cannonical_patterns"]:
+				message = "added {0} to cannonical patters".format(p)
+				logger.debug(message)
+				configuration["cannonical_patterns"].append(p)
+		except:
+			raise
+			
+	return configuration
 
 
 def logConfigure(logFileName=os.path.basename(__file__), debugFlag=False, logPath='../log/'):
@@ -97,11 +104,13 @@ def logConfigure(logFileName=os.path.basename(__file__), debugFlag=False, logPat
 	logger.addHandler(ch)
 	logger.addHandler(fh)
 
+	message = "debugging enabled"
+	logger.debug(message)
 	return logger
 
 
 # define host matchs
-cannonicalPatterns = ["qcd", "farm", "winter"]
+cannonicalPatterns = ["qcd", "farm", "winter", "box"]
 
 
 def checkNew(cannonicalPatterns, knownHosts):
@@ -177,7 +186,7 @@ if __name__ == "__main__":
 	where the work is done
 	"""
 
-	logger = logConfigure()
+	logger = logConfigure(debugFlag=True)
 
 	sshKnownHosts = "{0}ssh_known_hosts".format(dat_dir)
 
