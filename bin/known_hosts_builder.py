@@ -120,31 +120,40 @@ def checkNew(cannonicalPatterns, knownHosts):
 	ssh_known_hosts.  If it is then it returns True and a list 
 	in dat_dir, else False and an empty list
 	"""
+	message = "checking for new ssh key files"
+	logger.debug(message)
+	
 	workList = []
 	fileList = next(os.walk(dat_dir))[2]
 
 	for f in fileList:
+		message = "found file {0}".format(f)
+		logger.debug(message)
 		for p in cannonicalPatterns:
 			if p in f:
+				message = "found that {0} matched {1}".format(f, p)
+				logger.debug(message)
 				workList.append(f)
 
 	if len(workList) == 0:
-		logMessage = "no files in {0} found matching {1}".format(dat_dir,str(cannonicalPatterns))
-		logger.error(logMessage)
-		return (False, [])
+		message = "no files in {0} found matching {1}".format(dat_dir,str(cannonicalPatterns))
+		logger.error(message)
+		raise ValueError(message)
 
 	if not os.path.isfile(sshKnownHosts):
 		logMessage = "no ssh_known_hosts file found in {0} new file will be generated.".format(dat_dir)
 		logger.info(logMessage)
-		return (True, workList)
+		return workList
 
 	for w in workList:
 		if os.path.getmtime(knownHosts) < os.path.getmtime(dat_dir + w):
 			logMessage = "new keys found"
 			logger.info(logMessage)
-			return (True, workList)
+			return workList
 
-	return (False, [])
+	message = "error state in checkNew"
+	logger.debug(message)
+	raise ValueError(message)
 
 
 def buildKnownHosts(fileList, knownHostsFile=""):
@@ -153,10 +162,15 @@ def buildKnownHosts(fileList, knownHostsFile=""):
 	if no output file is passed then it returns a string, else
 	it writes the list of host keys to the given file.
 	"""
+	message = "starting to build known hosts file"
+	logger.debug(message)
+	
 	keyList = []
 
 	for f in fileList:
 		f = "{0}{1}".format(dat_dir, f)
+		message = "checking {0}".format(f)
+		logger.debug(message)
 		try:
 			with open(f) as keyfile:
 				key = keyfile.read()
@@ -195,6 +209,7 @@ if __name__ == "__main__":
 	except:
 		err = sys.exc_info()[0]
 		logMessage = "error encountered checking for new host keys: {0}".format(str(err))
+		sys.exit(1)
 
 	try:
 		buildKnownHosts(keyList, sshKnownHosts)
