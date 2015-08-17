@@ -11,6 +11,46 @@ log_dir = "../log/"
 dat_dir = "../data/"
 logFile = "buildsshknownhosts.log"
 
+def readJsonConf(jsonFile):
+	"""
+	reads in the json formatted configuraiton file, and returns that data for parsing
+	:param jsonFile:
+	"""
+	message = "reading {0}".format(jsonFile)
+	logger.info(message)
+
+	try:
+		with open(jsonFile) as json_data_file:
+			configData = json.load(json_data_file)
+	except IOError as e:
+		message = "I/O Error {0}: {1}".format(jsonFile, e.strerror)
+		logger.error(message)
+		raise
+	except ValueError as e:
+		message = "Value Error reading {0}: {1}".format(jsonFile, str(e))
+		logger.error(message)
+		raise
+	except:
+		err = sys.exc_info()[0]
+		message = "error extracting config data from {0}: {1}".format(jsonFile.err)
+		raise
+
+	message = "finished reading configuration file: {0}".format(jsonFile)
+	logger.debug(message)
+
+	return configData
+
+def parseConfData(configData):
+	"""
+	parses the JSON formatted data
+	:param configData:
+	"""
+
+	message = "parsing configuration data"
+	logger.debug(message)
+
+
+
 def logConfigure(logFileName=os.path.basename(__file__), debugFlag=False, logPath='../log/'):
 	"""
 	experimental function to configure logging
