@@ -145,7 +145,7 @@ def checkNew(cannonicalPatterns, knownHosts):
 		logger.error(message)
 		raise ValueError(message)
 
-	if not os.path.isfile(sshKnownHosts):
+	if not os.path.isfile(knownHosts):
 		logMessage = "no ssh_known_hosts file found in {0} new file will be generated.".format(dat_dir)
 		logger.info(logMessage)
 		return workList
@@ -156,9 +156,9 @@ def checkNew(cannonicalPatterns, knownHosts):
 			logger.info(logMessage)
 			return workList
 
-	message = "error state in checkNew"
-	logger.debug(message)
-	raise ValueError(message)
+	message = "all ssh key files older then the known host file"
+	logger.info(message)
+	return True
 
 
 def buildKnownHosts(fileList, knownHostsFile=""):
@@ -238,14 +238,16 @@ if __name__ == "__main__":
 		keyList = checkNew(cannonicalPatterns, sshKnownHosts)
 	except:
 		err = sys.exc_info()[0]
-		logMessage = "error encountered checking for new host keys: {0}".format(str(err))
+		message = "error encountered checking for new host keys: {0}".format(str(err))
+		logger.error(message)
 		sys.exit(1)
 
 	try:
 		buildKnownHosts(keyList, sshKnownHosts)
 	except:
 		err = sys.exc_info()[0]
-		logMessage = "error encountered creating known host file: {0}".format(str(err))
+		message = "error encountered creating known host file: {0}".format(str(err))
+		logger.error(message)
 		sys.exit(1)
 
 	logMessage = "ssh_known_hosts file updated"
