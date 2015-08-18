@@ -1,5 +1,5 @@
 {
-	"configuration":{
+	"configuration": {
 		"debug_flag": "False",
         "cannonical_patterns": [
           "qcd",
