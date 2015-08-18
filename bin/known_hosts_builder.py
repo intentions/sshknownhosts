@@ -54,20 +54,17 @@ def parseConfData(configData, debugFlag=False):
 	}
 
 	if debugFlag: print "default config dictionary:\n {0}".format(str(configuration))
-	
-	for confKey in configData.key():
+
+	for confKey in configData.keys():
 		if debugFlag: print "processing {0}".format(str(confKey))
-		try:
-			configuration["debug_flag"] = bool(configData[configKey]["debug_flag"])
-			if debugFlag: print "debug flag set"
-			for p in configData[configKey]["cannonical_patterns"]:
-				message = "added {0} to cannonical patters".format(p)
-				logger.debug(message)
-				configuration["cannonical_patterns"].append(p)
-		except:
-			print "error processing config data:\n {0}".format(sys.exc_info()[0])
-			raise
-			
+		print str(configData[confKey]["debug_flag"])
+		configuration["debug_flag"] = bool(configData[confKey]["debug_flag"])
+		if debugFlag: print "debug flag set"
+		for p in configData[confKey]["cannonical_patterns"]:
+			message = "added {0} to cannonical patters".format(p)
+			logger.debug(message)
+			configuration["cannonical_patterns"].append(p)
+
 	return configuration
 
 
