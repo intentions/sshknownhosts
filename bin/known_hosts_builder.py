@@ -50,32 +50,38 @@ def parseConfData(configData, debugFlag=False):
 		"debug_flag": False,
 		"cannonical_patterns": [],
 		"path_to_key_file": "",
-		"log_path": ""
+		"log_path": "",
+		"log_file": ""
 	}
 
 	if debugFlag: print "default config dictionary:\n {0}".format(str(configuration))
 
 	for confKey in configData.keys():
 		if debugFlag: print "processing {0}".format(str(confKey))
-		print str(configData[confKey]["debug_flag"])
 		configuration["debug_flag"] = bool(configData[confKey]["debug_flag"])
 		if debugFlag: print "debug flag set"
 		for p in configData[confKey]["cannonical_patterns"]:
-			message = "added {0} to cannonical patters".format(p)
-			logger.debug(message)
+			if debugFlag: "adding {0} to cannonical patters".format(p)
 			configuration["cannonical_patterns"].append(p)
+		if debugFlag: print "key file path: {0}".format(configData[confKey]["path_to_key_file"])
+		configuration["path_to_key_file"] = configData[confKey]["path_to_key_file"]
+		if debugFlag: print "log path: {0}".format(configData[confKey]['log_path'])
+		configuration["log_path"] = configData[confKey]['log_path']
+		if debugFlag: print "log file: {0}".format(configData[confKey]["log_file"])
+		configuration["log_file"] = configData[confKey]["log_file"]
 
 	return configuration
 
-
-def logConfigure(logFileName=os.path.basename(__file__), debugFlag=False, logPath='../log/'):
+def logConfigure(LogFileName, LogPath, debugFlag):
 	"""
-	experimental function to configure logging
+	configure logging
 	"""
+	if debugFlag: print "entering log configuraiton"
 
-	logFile = '{0}{1}'.format(logPath, logFileName)
+	logFile = '{0}{1}'.format(LogPath, LogFileName)
+	if debugFlag: print "log file: {0}".format(logFile)
 
-	logger = logging.getLogger(logFileName)
+	logger = logging.getLogger(LogFileName)
 	logger.setLevel(logging.DEBUG)
 
 	# create file handler which logs even debug messages
@@ -218,7 +224,11 @@ if __name__ == "__main__":
 		sys.exit(1)
 	
 	if debugFlag: "configuring logging"
-	logger = logConfigure(debugFlag)
+
+	print "log file: {0}".format(configuration['log_file'])
+
+
+	logger = logConfigure(configuration['log_file'], configuration['log_path'], configuration['debug_flag'])
 
 	sshKnownHosts = "{0}ssh_known_hosts".format(dat_dir)
 	message = "known hosts file will be written to {0}".format(dat_dir)

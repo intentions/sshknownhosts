@@ -6,7 +6,8 @@
           "farm",
           "winter"
         ],
-		"path_to_key_file": "../data",
-		"log_path": "../log/"
+		"path_to_key_file": "../data/",
+		"log_path": "../log/",
+        "log_file": "known_hosts_builder.log"
 	}
 }
