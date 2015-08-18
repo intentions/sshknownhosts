@@ -59,7 +59,7 @@ def parseConfData(configData):
 	for confKey in configData.key():
 		try:
 			configuration["debug_flag"] = str(configData[configKey]["debug_flag"])
-			configuration[]
+			configuration[""]
 
 
 def logConfigure(logFileName=os.path.basename(__file__), debugFlag=False, logPath='../log/'):
