@@ -11,43 +11,40 @@ log_dir = "../log/"
 dat_dir = "../data/"
 logFile = "buildsshknownhosts.log"
 
-def readJsonConf(jsonFile):
+def readJsonConf(jsonFile, debugFlag=False):
 	"""
 	reads in the json formatted configuraiton file, and returns that data for parsing
 	:param jsonFile:
 	"""
 	message = "reading {0}".format(jsonFile)
-	logger.info(message)
+	print message
 
+	print str(debugFlag)
+	
+	if not os.path.isfile(jsonFile):
+		message = "Error, config file {0} does not exist.".format(jsonFile)
+		print message
 	try:
 		with open(jsonFile) as json_data_file:
 			configData = json.load(json_data_file)
+			if debugFlag: print "config dump:\n {0}".format(str(configData))
 	except IOError as e:
-		message = "I/O Error {0}: {1}".format(jsonFile, e.strerror)
-		logger.error(message)
-		raise
-	except ValueError as e:
-		message = "Value Error reading {0}: {1}".format(jsonFile, str(e))
-		logger.error(message)
+		print "IOError ({0}) reading {1}:\n {2}".format(e.errno, jsonFile, e.strerror)
 		raise
 	except:
-		err = sys.exc_info()[0]
-		message = "error extracting config data from {0}: {1}".format(jsonFile.err)
+		print "unexpected error encoutered reading configuration file: {0}".format(sys.exc_info()[0])
 		raise
-
-	message = "finished reading configuration file: {0}".format(jsonFile)
-	logger.debug(message)
-
+	
+	if debugFlag: print "finished reading configuration file: {0}".format(jsonFile)
 	return configData
 
-def parseConfData(configData):
+def parseConfData(configData, debugFlag=False):
 	"""
 	parses the JSON formatted data
 	:param configData:
 	"""
-
-	message = "parsing configuration data"
-	logger.debug(message)
+	
+	if debugFlag: print "parsing configuration data"
 
 	configuration = {
 		"debug_flag": False,
@@ -56,14 +53,19 @@ def parseConfData(configData):
 		"log_path": ""
 	}
 
+	if debugFlag: print "default config dictionary:\n {0}".format(str(configuration))
+	
 	for confKey in configData.key():
+		if debugFlag: print "processing {0}".format(str(confKey))
 		try:
-			configuration["debug_flag"] = str(configData[configKey]["debug_flag"])
+			configuration["debug_flag"] = bool(configData[configKey]["debug_flag"])
+			if debugFlag: print "debug flag set"
 			for p in configData[configKey]["cannonical_patterns"]:
 				message = "added {0} to cannonical patters".format(p)
 				logger.debug(message)
 				configuration["cannonical_patterns"].append(p)
 		except:
+			print "error processing config data:\n {0}".format(sys.exc_info()[0])
 			raise
 			
 	return configuration
@@ -200,10 +202,31 @@ if __name__ == "__main__":
 	where the work is done
 	"""
 
-	logger = logConfigure(debugFlag=True)
+	debugFlag = True
+	
+	configuration_file = "known_hosts_builder.json"
+	
+	try:
+		if debugFlag: print "reading configuration file {0}".format(configuration_file)
+		rawConfig = readJsonConf(configuration_file, debugFlag)
+	except:
+		print "exiting"
+		sys.exit(1)
+	
+	try:
+		if debugFlag: print "processing configuration data"
+		configuration = parseConfData(rawConfig, debugFlag)
+	except:
+		print "error, exiting:\n {0}".format(sys.exc_info()[0])
+		sys.exit(1)
+	
+	if debugFlag: "configuring logging"
+	logger = logConfigure(debugFlag)
 
 	sshKnownHosts = "{0}ssh_known_hosts".format(dat_dir)
-
+	message = "known hosts file will be written to {0}".format(dat_dir)
+	logger.debug(message)
+	
 	try:
 		keyList = checkNew(cannonicalPatterns, sshKnownHosts)
 	except:
