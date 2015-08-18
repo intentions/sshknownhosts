@@ -11,6 +11,66 @@ log_dir = "../log/"
 dat_dir = "../data/"
 logFile = "buildsshknownhosts.log"
 
+def readJsonConf(jsonFile, debugFlag=False):
+	"""
+	reads in the json formatted configuraiton file, and returns that data for parsing
+	:param jsonFile:
+	"""
+	message = "reading {0}".format(jsonFile)
+	print message
+
+	print str(debugFlag)
+	
+	if not os.path.isfile(jsonFile):
+		message = "Error, config file {0} does not exist.".format(jsonFile)
+		print message
+	try:
+		with open(jsonFile) as json_data_file:
+			configData = json.load(json_data_file)
+			if debugFlag: print "config dump:\n {0}".format(str(configData))
+	except IOError as e:
+		print "IOError ({0}) reading {1}:\n {2}".format(e.errno, jsonFile, e.strerror)
+		raise
+	except:
+		print "unexpected error encoutered reading configuration file: {0}".format(sys.exc_info()[0])
+		raise
+	
+	if debugFlag: print "finished reading configuration file: {0}".format(jsonFile)
+	return configData
+
+def parseConfData(configData, debugFlag=False):
+	"""
+	parses the JSON formatted data
+	:param configData:
+	"""
+	
+	if debugFlag: print "parsing configuration data"
+
+	configuration = {
+		"debug_flag": False,
+		"cannonical_patterns": [],
+		"path_to_key_file": "",
+		"log_path": ""
+	}
+
+	if debugFlag: print "default config dictionary:\n {0}".format(str(configuration))
+	
+	for confKey in configData.key():
+		if debugFlag: print "processing {0}".format(str(confKey))
+		try:
+			configuration["debug_flag"] = bool(configData[configKey]["debug_flag"])
+			if debugFlag: print "debug flag set"
+			for p in configData[configKey]["cannonical_patterns"]:
+				message = "added {0} to cannonical patters".format(p)
+				logger.debug(message)
+				configuration["cannonical_patterns"].append(p)
+		except:
+			print "error processing config data:\n {0}".format(sys.exc_info()[0])
+			raise
+			
+	return configuration
+
+
 def logConfigure(logFileName=os.path.basename(__file__), debugFlag=False, logPath='../log/'):
 	"""
 	experimental function to configure logging
@@ -46,11 +106,13 @@ def logConfigure(logFileName=os.path.basename(__file__), debugFlag=False, logPat
 	logger.addHandler(ch)
 	logger.addHandler(fh)
 
+	message = "debugging enabled"
+	logger.debug(message)
 	return logger
 
 
 # define host matchs
-cannonicalPatterns = ["qcd", "farm", "winter"]
+cannonicalPatterns = ["qcd", "farm", "winter", "box"]
 
 
 def checkNew(cannonicalPatterns, knownHosts):
@@ -60,31 +122,40 @@ def checkNew(cannonicalPatterns, knownHosts):
 	ssh_known_hosts.  If it is then it returns True and a list 
 	in dat_dir, else False and an empty list
 	"""
+	message = "checking for new ssh key files"
+	logger.debug(message)
+	
 	workList = []
 	fileList = next(os.walk(dat_dir))[2]
 
 	for f in fileList:
+		message = "found file {0}".format(f)
+		logger.debug(message)
 		for p in cannonicalPatterns:
 			if p in f:
+				message = "found that {0} matched {1}".format(f, p)
+				logger.debug(message)
 				workList.append(f)
 
 	if len(workList) == 0:
-		logMessage = "no files in {0} found matching {1}".format(dat_dir,str(cannonicalPatterns))
-		logger.error(logMessage)
-		return (False, [])
+		message = "no files in {0} found matching {1}".format(dat_dir,str(cannonicalPatterns))
+		logger.error(message)
+		raise ValueError(message)
 
 	if not os.path.isfile(sshKnownHosts):
 		logMessage = "no ssh_known_hosts file found in {0} new file will be generated.".format(dat_dir)
 		logger.info(logMessage)
-		return (True, workList)
+		return workList
 
 	for w in workList:
 		if os.path.getmtime(knownHosts) < os.path.getmtime(dat_dir + w):
 			logMessage = "new keys found"
 			logger.info(logMessage)
-			return (True, workList)
+			return workList
 
-	return (False, [])
+	message = "error state in checkNew"
+	logger.debug(message)
+	raise ValueError(message)
 
 
 def buildKnownHosts(fileList, knownHostsFile=""):
@@ -93,10 +164,15 @@ def buildKnownHosts(fileList, knownHostsFile=""):
 	if no output file is passed then it returns a string, else
 	it writes the list of host keys to the given file.
 	"""
+	message = "starting to build known hosts file"
+	logger.debug(message)
+	
 	keyList = []
 
 	for f in fileList:
 		f = "{0}{1}".format(dat_dir, f)
+		message = "checking {0}".format(f)
+		logger.debug(message)
 		try:
 			with open(f) as keyfile:
 				key = keyfile.read()
@@ -126,15 +202,37 @@ if __name__ == "__main__":
 	where the work is done
 	"""
 
-	logger = logConfigure()
+	debugFlag = True
+	
+	configuration_file = "known_hosts_builder.json"
+	
+	try:
+		if debugFlag: print "reading configuration file {0}".format(configuration_file)
+		rawConfig = readJsonConf(configuration_file, debugFlag)
+	except:
+		print "exiting"
+		sys.exit(1)
+	
+	try:
+		if debugFlag: print "processing configuration data"
+		configuration = parseConfData(rawConfig, debugFlag)
+	except:
+		print "error, exiting:\n {0}".format(sys.exc_info()[0])
+		sys.exit(1)
+	
+	if debugFlag: "configuring logging"
+	logger = logConfigure(debugFlag)
 
 	sshKnownHosts = "{0}ssh_known_hosts".format(dat_dir)
-
+	message = "known hosts file will be written to {0}".format(dat_dir)
+	logger.debug(message)
+	
 	try:
 		keyList = checkNew(cannonicalPatterns, sshKnownHosts)
 	except:
 		err = sys.exc_info()[0]
 		logMessage = "error encountered checking for new host keys: {0}".format(str(err))
+		sys.exit(1)
 
 	try:
 		buildKnownHosts(keyList, sshKnownHosts)
@@ -146,3 +244,4 @@ if __name__ == "__main__":
 	logMessage = "ssh_known_hosts file updated"
 	logger.info(logMessage)
 	sys.exit(0)
+
