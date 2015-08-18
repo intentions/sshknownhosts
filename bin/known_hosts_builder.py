@@ -115,7 +115,7 @@ def logConfigure(LogFileName, LogPath, debugFlag):
 
 
 # define host matchs
-cannonicalPatterns = ["qcd", "farm", "winter", "box"]
+#cannonicalPatterns = ["qcd", "farm", "winter", "box"]
 
 
 def checkNew(cannonicalPatterns, knownHosts):
@@ -158,7 +158,7 @@ def checkNew(cannonicalPatterns, knownHosts):
 
 	message = "all ssh key files older then the known host file"
 	logger.info(message)
-	return True
+	sys.exit(0)
 
 
 def buildKnownHosts(fileList, knownHostsFile=""):
@@ -173,6 +173,7 @@ def buildKnownHosts(fileList, knownHostsFile=""):
 	keyList = []
 
 	for f in fileList:
+		print "weee"
 		f = "{0}{1}".format(dat_dir, f)
 		message = "checking {0}".format(f)
 		logger.debug(message)
@@ -210,7 +211,6 @@ if __name__ == "__main__":
 	configuration_file = "known_hosts_builder.json"
 	
 	try:
-		if debugFlag: print "reading configuration file {0}".format(configuration_file)
 		rawConfig = readJsonConf(configuration_file, debugFlag)
 	except:
 		print "exiting"
@@ -230,17 +230,26 @@ if __name__ == "__main__":
 
 	logger = logConfigure(configuration['log_file'], configuration['log_path'], configuration['debug_flag'])
 
-	sshKnownHosts = "{0}ssh_known_hosts".format(dat_dir)
-	message = "known hosts file will be written to {0}".format(dat_dir)
+	sshKnownHosts = "{0}ssh_known_hosts".format(configuration["path_to_key_file"])
+	message = "known hosts file will be written to {0}".format(sshKnownHosts)
 	logger.debug(message)
-	
+
+	cannonicalPatterns = configuration["cannonical_patterns"]
+	message = "cannonical patters: {0}".format(str(cannonicalPatterns))
+	logger.debug(message)
+
 	try:
 		keyList = checkNew(cannonicalPatterns, sshKnownHosts)
+	except SystemExit:
+		sys.exit(0)
 	except:
 		err = sys.exc_info()[0]
 		message = "error encountered checking for new host keys: {0}".format(str(err))
 		logger.error(message)
 		sys.exit(1)
+
+	message = "building known host file"
+	logger.debug(message)
 
 	try:
 		buildKnownHosts(keyList, sshKnownHosts)
